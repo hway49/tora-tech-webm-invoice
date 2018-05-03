@@ -9,6 +9,6 @@ public class HellowController {
 	                                                                                                           
 	@RequestMapping("/hello")                                                                                  
 	public String index(@ModelAttribute SampleForm sampleForm) {
-		return "hello";                                                         
+		return "hello";                                                  
 	}
 }
