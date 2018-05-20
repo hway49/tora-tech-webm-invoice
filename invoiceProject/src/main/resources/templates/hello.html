@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Spring Boot Sample Site</title>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 </head>
 <body>
 	<h1>フォーム</h1>
@@ -14,5 +15,30 @@
 	<h1>表示</h1>
 	<div th:text="'名前： ' + ${sampleForm.name}"></div>
 	<div th:text="'年齢： ' + ${sampleForm.age}"></div>
+	
+<script>
+$(function(){
+	/*------------------------------------------------
+	JSONを読み込む
+	------------------------------------------------*/
+	$.getJSON(
+		"https://api.myjson.com/bins/189dvu", 
+		  function(data) {
+		    var items = [];
+		    //dataがサーバから受け取るjson値
+		    $.each(data, function(key, val) {
+		      items.push('<li id="' + key + '">' + val + '</li>');
+		    });
+		    //サーバから受け取った値をULリストにしてBody内に挿入
+		    $('<ul/>', {
+		      'class': 'my-new-list',
+		      html: items.join('')
+		    }).appendTo('body');
+		  }
+	);
+});
+
+
+</script>
 </body>
 </html>
