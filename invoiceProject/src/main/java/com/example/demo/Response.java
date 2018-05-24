@@ -28,5 +28,5 @@ public class Response {
     public ErrorResponse errors;
 
     /** The result. */
-    public Hoge result;
+    public RequestPostInvoice result;
 }
