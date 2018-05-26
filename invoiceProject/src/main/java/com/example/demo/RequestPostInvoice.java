@@ -15,12 +15,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "invoice")
+//@Entity
+//@Table(name = "invoice")
 public class RequestPostInvoice {
 
-	@Id
-	@GeneratedValue
+//	@Id
+//	@GeneratedValue
 	private Integer invoiceNo;
 
 	/** The client no. */
