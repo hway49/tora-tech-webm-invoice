@@ -1,34 +1,28 @@
+/*
+ *
+ */
 package com.example.demo;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import javax.validation.Valid;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-//import org.springframework.http.MediaType;
-import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * The Class InvoiceController.
  */
+@CrossOrigin
 @RestController
 public class InvoiceController {
 
@@ -38,84 +32,130 @@ public class InvoiceController {
 	/**
 	 * Home.
 	 *
-	 * @param client_no
+	 * @param clientNo
 	 *            the client no
-	 * @param invoice_start_date
+	 * @param invoiceStartDate
 	 *            the invoice start date
-	 * @param invoice_end_date
+	 * @param invoiceEndDate
 	 *            the invoice end date
-	 * @param create_user
+	 * @param createUser
 	 *            the create user
-	 * @param invoice_create_date
+	 * @param invoiceCreateDate
 	 *            the invoice create date
 	 * @return the response
 	 */
 	@PostMapping("/invoice")
 	// @ResponseStatus(HttpStatus.BAD_REQUEST)
-	// public List<RequestPostInvoice> top(@Validated @RequestParam("client_no")
-	// String client_no,
-	public Response setResultvalue(@Validated @RequestParam("client_no") String client_no,
-			@Validated @RequestParam("invoice_start_date") String invoice_start_date,
-			@Validated @RequestParam("invoice_end_date") String invoice_end_date,
-			@Validated @RequestParam("create_user") String create_user,
-			@Validated @RequestParam("invoice_create_date") String invoice_create_date) {
-		// RequestPostInvoice rpi = new RequestPostInvoice();
-		// List<RequestPostInvoice> list = new ArrayList<RequestPostInvoice>();
+	public PostResponse Regist(@Validated @RequestParam("client_no") String clientNo,
+			@Validated @RequestParam("invoice_start_date") String invoiceStartDate,
+			@Validated @RequestParam("invoice_end_date") String invoiceEndDate,
+			@Validated @RequestParam("create_user") String createUser,
+			@Validated @RequestParam("invoice_create_date") String invoiceCreateDate) {
 
 		RequestPostInvoice rpi = new RequestPostInvoice();
 		ErrorResponse er = new ErrorResponse();
 
-		if (checkItem(client_no, er)) {
-			rpi.setClientNo(client_no);
-		}
-		rpi.setInvoiceStartDate(invoice_start_date);
-		rpi.setInvoiceEndDate(invoice_end_date);
-		rpi.setCreateUser(create_user);
-		rpi.setInvoiceCreateDate(invoice_create_date);
+		// 実装中～
+		if (checkItem(clientNo, er)) {
+			String sql = "INSERT INTO invoice("
+					+ "client_no,"
+					+ "invoice_status,"
+					+ "invoice_create_date,"
+					+ "invoice_title,"
+					+ "invoice_amt,"
+					+ "invoice_start_date,"
+					+ "invoice_end_date,"
+					+ "invoice_note,"
+					+ "create_user,"
+//					+ "create_datetime,"
+					+ "update_user,"
+//					+ "update_datetime,"
+					+ "del_flg"
+					+ ")VALUES("
+					+ "'" + clientNo + "',"
+					+ "'10',"
+					+ "'" + invoiceCreateDate + "',"
+					+ "'請求書ですー',"
+					+ "100,"
+					+ "'" + invoiceStartDate + "',"
+					+ "'" + invoiceEndDate + "',"
+					+ "'備考備考備考',"
+					+ "'" + createUser + "',"
+//					+ "create_datetime,"
+					+ "'hase',"
+//					+ "update_datetime,"
+					+ "0"
+					+ ")"
+					+ ";";
 
-		// list.add(rpi);
-		// returnResponse(rpi, null);
+			RowMapper<InvoiceDao> mapper = new BeanPropertyRowMapper<>(InvoiceDao.class);
+			int regist = jdbcTemplate.update(sql);
+
+			//登録後にinvoiceNoを取得
+			RowMapper<InvoiceDao> responseMapper = new BeanPropertyRowMapper<>(InvoiceDao.class);
+			String responseSql = "select invoice_no from invoice where update_datetime=(select max(update_datetime) from invoice);";
+
+			List<InvoiceDao> rs2 = jdbcTemplate.query(responseSql, responseMapper);
+			InvoiceDao resonseInvoice = rs2.get(0);
+			rpi.setInvoiceNo(resonseInvoice.getInvoiceNo());
+		}
+
+		PostResponse postResponse = new PostResponse();
+		postResponse.setResult(rpi);
+		postResponse.setErrors(er);
+		return postResponse;
+	}
+
+	@GetMapping("/invoice/{id}")
+	// public List<InvoiceDao> getInvoice(@PathVariable("id") String id) {
+	public Response Serch(@PathVariable("id") String id) {
+
+		InvoiceResult ir = new InvoiceResult();
+		ErrorResponse er = new ErrorResponse();
+
+		if (checkItem(id, er)) {
+			ir.setInvoiceNo(id);
+
+			RowMapper<InvoiceDao> mapper = new BeanPropertyRowMapper<>(InvoiceDao.class);
+			String sql = "SELECT " + "invoice.invoice_no," + "invoice.client_no," + "client_charge_last_name," +
+					"client_charge_first_name," +
+					"client_name," + "client_address," + "client_tel," + "client_fax," + "invoice_status,"
+					+ "invoice_create_date," + "invoice_title," + "invoice_amt," +
+					// "tax_amt," +
+					"invoice_start_date," + "invoice_end_date," + "invoice_note," + "create_user,"
+					+ "invoice.create_datetime," + "update_user," + "invoice.update_datetime"
+					+ " FROM invoice join client on invoice.client_no=client.client_no" + " where invoice_no=" + id
+					+ ";";
+
+			List<InvoiceDao> rs = jdbcTemplate.query(sql, mapper);
+			InvoiceDao invoice = rs.get(0);
+
+			ir.setClientName(invoice.getClientName());
+			ir.setClientNo(invoice.getClientNo());
+			ir.setClientAddress(invoice.getClientAddress());
+			ir.setClientTel(invoice.getClientTel());
+			ir.setClientFax(invoice.getClientFax());
+			ir.setClientChargeName(invoice.getClientChargeLastName() + invoice.getClientChargeFirstName());
+			ir.setInvoiceStatus(invoice.getInvoiceStatus());
+			ir.setInvoiceCreateDate(invoice.getInvoiceCreateDate());
+			ir.setInvoiceTitle(invoice.getInvoiceTitle());
+			ir.setInvoiceAmt(invoice.getInvoiceAmt());
+			ir.setTaxAmt(invoice.getTaxAmt());
+			ir.setInvoiceStartDate(invoice.getInvoiceStartDate());
+			ir.setInvoiceEndDate(invoice.getInvoiceEndDate());
+			ir.setInvoiceNote(invoice.getInvoiceNote());
+			ir.setCreateUser(invoice.getCreateUser());
+			ir.setCreateDatetime(invoice.getCreateDatetime());
+			ir.setUpdateUser(invoice.getUpdateUser());
+			ir.setUpdateDatetime(invoice.getUpdateDatetime());
+		}
 
 		Response response = new Response();
-		response.setResult(rpi);
+		response.setResult(ir);
 		response.setErrors(er);
 		return response;
 	}
 
-	@GetMapping("/invoice")
-	public List<InvoiceDao> getInvoice() {
-
-		RowMapper<InvoiceDao> mapper = new BeanPropertyRowMapper<>(InvoiceDao.class);
-
-		List<InvoiceDao> rs = jdbcTemplate.query("select invoice_no from invoice", mapper);
-
-		return rs;
-	}
-
-	/** The repository. */
-	// @Autowired
-	// private InvoiceService invoiceService;
-
-	/**
-	 * RequestPostInvoice.
-	 *
-	 * @param model
-	 *            the model
-	 * @param id
-	 *            the id
-	 * @return the list
-	 */
-	// @GetMapping("/invoice/{id}")
-	// public List<InvoiceResult> get(Model model, @PathVariable("id") int id) {
-	//
-	//// List<RequestPostInvoice> requestPostInvoice = new
-	// ArrayList<RequestPostInvoice>();
-	//// requestPostInvoice.add(new RequestPostInvoice());
-	////
-	//// return requestPostInvoice;
-	// List<InvoiceResult> rp = invoiceService.findById(id);
-	// return rp;
-	// }
 
 	/**
 	 * Check item.
@@ -165,4 +205,6 @@ public class InvoiceController {
 			return false;
 		}
 	}
+
+
 }

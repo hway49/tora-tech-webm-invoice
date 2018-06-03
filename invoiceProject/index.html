@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<head>
+<meta charset="UTF-8">
+<title>Spring Boot Sample Site</title>
+<script
+	src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<style>
+ul#output {
+	text-align: center;
+	list-style: none;
+}
+
+li:nth-child(odd) {
+	float: left;
+	background: #afe4c4;
+	width: 150px;
+}
+
+li:nth-child(even) {
+	background: #ededed;
+}
+
+li {
+	margin-bottom: 2px;
+	line-height: 1.8em;
+}
+</style>
+</head>
+<body>
+
+	<h1>請求書サービス</h1>
+	<!-- POSTここから -->
+	<h2>登録</h2>
+	<form type="post" action="/invoice">
+		<input type="text" name="client_no" value="20001" />
+		<input type="text" name="invoice_start_date" value="2018-04-22" />
+		<input type="text" name="invoice_end_date" value="2018-05-23" />
+		<input type="text" name="create_user" value="たろう" />
+		<input type="text" name="invoice_create_date" value="2018-05-01" />
+		<input type="submit" value="送信" />
+	</form>
+	<!-- POSTここまで -->
+	<!-- GETここから -->
+	<h2>検索</h2>
+	<form class="getForm" type="get" action="/invoice/">
+		<input type="text" name="get_client_no" value="10" /> <input
+			type="submit" value="送信" />
+	</form>
+	<!-- GETここまで -->
+	<ul id="output"></ul>
+
+	<script>
+		$('input[type="submit"]').click(
+				function(event) {
+					var url = "http://localhost:8080/invoice";
+					var form = $(this).parents('form');
+					var type = form.attr('type');
+					event.preventDefault();
+					if (form.hasClass("getForm")) {
+						var invoiceNo = $('input[name="get_client_no"]').val();
+						url = url + "/" + invoiceNo;
+					}
+
+					$.ajax({
+						type : type, // method
+						url : url, // POST送信先のURL
+						data : form.serialize(), // データ本体
+						dataType : "json", // レスポンスをJSONとしてパースする
+						success : function(data) { // 200 OK時
+							$("#output").empty();
+							$("#output").append("<li>請求書管理番号</li><li>" + data.result.invoice_no + "</li>");
+									if(type=="get"){
+										$("#output").append(
+											"<li>顧客管理番号</li><li>"
+											+ data.result.client_no + "</li>"
+											+ "<li>法人名</li><li>"
+											+ data.result.client_name + "</li>"
+											+ "<li>住所</li><li>"
+											+ data.result.client_address
+											+ "</li>" + "<li>電話番号</li><li>"
+											+ data.result.client_tel + "</li>"
+											+ "<li>FAX</li><li>"
+											+ data.result.client_fax + "</li>"
+											+ "<li>顧客担当者名</li><li>"
+											+ data.result.client_charge_name
+											+ "</li>" + "<li>請求状態</li><li>"
+											+ data.result.invoice_status
+											+ "</li>" + "<li>請求書作成日</li><li>"
+											+ data.result.invoice_create_date
+											+ "</li>" + "<li>請求書件名</li><li>"
+											+ data.result.invoice_title
+											+ "</li>" + "<li>請求書金額</li><li>"
+											+ data.result.invoice_amt + "</li>"
+											+ "<li>消費税</li><li>"
+											+ data.result.tax_amt + "</li>"
+											+ "<li>請求期間開始日</li><li>"
+											+ data.result.invoice_start_date
+											+ "</li>" + "<li>請求期間終了日</li><li>"
+											+ data.result.invoice_end_date
+											+ "</li>" + "<li>備考</li><li>"
+											+ data.result.invoice_note
+											+ "</li>" + "<li>登録ユーザID</li><li>"
+											+ data.result.create_user + "</li>"
+											+ "<li>登録日時</li><li>"
+											+ data.result.create_datetime
+											+ "</li>" + "<li>更新ユーザID</li><li>"
+											+ data.result.update_user + "</li>"
+											+ "<li>更新日時</li><li>"
+											+ data.result.update_datetime
+											+ "</li>"
+										);}
+						},
+						error : function() { // HTTPエラー時
+							alert("Server Error. Please try again later.");
+						}
+					});
+				});
+	</script>
+
+
+
+</body>
+</html>

@@ -2,9 +2,6 @@ package com.example.demo;
 
 import java.io.Serializable;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,14 +9,15 @@ import lombok.ToString;
 
 @Data
 @ToString
-//@Entity
-//@Table(name = "invoice")
 @NoArgsConstructor
 @AllArgsConstructor
 public class InvoiceResult{
 
     /** The invoice no. */
     private String invoiceNo;
+
+    /** The client name. */
+    private String clientNo;
 
     /** The client name. */
     private String clientName;
