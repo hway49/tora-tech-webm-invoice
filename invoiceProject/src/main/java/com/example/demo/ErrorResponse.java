@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
  * @param errorDetail the error detail
  */
 @AllArgsConstructor
-public class ErrorResponse {
 
+public class ErrorResponse {
 	/** The error code. */
 	private String errorCode;
 

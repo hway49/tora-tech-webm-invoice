@@ -1,5 +1,10 @@
 package com.example.demo;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,9 +21,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PostResponse {
 
-    /** The error. */
-    public ErrorResponse errors;
+    /** The errors. */
+    @JsonProperty("errors")
+    private List<ErrorResponse> invoiceErrorList = new ArrayList<ErrorResponse>();
 
     /** The result. */
     public RequestPostInvoice result;
+
 }
